@@ -17,20 +17,13 @@ async def receive_gps_data(request: Request):
     Endpoint to receive GPS data from Visionaline devices.
     """
     try:
-        content_type = request.headers.get("content-type")
-        print("Content-Type:", content_type)
         raw_body = await request.body()
-        print("Raw body received:", raw_body[:1000])
-
         payload_dict = json.loads(raw_body)
-        print("Decoded JSON:", payload_dict)
-
     except json.JSONDecodeError as e:
         raise HTTPException(
             status_code=400,
             detail=f"Invalid JSON: {e}"
         )
-
     try:
         payload = GPSPayload(**payload_dict)
     except ValidationError as ve:
@@ -40,7 +33,8 @@ async def receive_gps_data(request: Request):
             detail=str(ve)
         )
 
-    print("Received GPS data:", payload.dict())
+    print("Received GPS data. Batch time:", payload.time)
+    print("Data count:", len(payload.data))
 
     # Check type and tenant ID
     if payload.type != "GPS":
