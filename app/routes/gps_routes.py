@@ -24,13 +24,9 @@ async def receive_gps_data(payload: GPSPayload):
     if str(payload.tenantId) != TENANT_ID:
         raise HTTPException(status_code=403, detail="Invalid tenant ID")
 
-    try:
-        await process_gps_data(payload)
-    except Exception as e:
-        print(f"Error processing GPS data: {e}")
-        raise HTTPException(
-            status_code=500, 
-            detail="Error processing GPS data"
-        )
+    result = await process_gps_data(payload)
+    if result["status"] == "error":
+        print(f"Error processing GPS data: {result['message']}")
+        raise HTTPException(status_code=400, detail=result["message"])
 
     return {"status": "received", "data": payload}
