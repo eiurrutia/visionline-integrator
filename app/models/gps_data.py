@@ -6,20 +6,26 @@ class GPSData(BaseModel):
     id: str
     uniqueId: str
     vehicleId: str
-    angle: int
-    lat: float
-    lng: float
-    speed: float
-    time: str
-    numOfSatellites: int
-    hdop: float
-    signalStrength: int
-    acc: int
-    altitude: int
-    vehicleNumber: str
-    fleetName: str
-    mileage: float
-    extendData: Optional[str]
+
+    angle: Optional[int] = None
+
+    lat: Optional[float] = None
+    lng: Optional[float] = None
+
+    speed: Optional[float] = None
+    time: Optional[str] = None
+
+    numOfSatellites: Optional[int] = None
+    hdop: Optional[float] = None
+    signalStrength: Optional[int] = None
+    acc: Optional[int] = None
+    altitude: Optional[int] = None
+    vehicleNumber: Optional[str] = None
+    fleetName: Optional[str] = None
+
+    mileage: Optional[float] = None
+
+    extendData: Optional[str] = None
 
 
 class GPSPayload(BaseModel):

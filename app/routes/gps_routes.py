@@ -20,7 +20,7 @@ async def receive_gps_data(request: Request):
         content_type = request.headers.get("content-type")
         print("Content-Type:", content_type)
         raw_body = await request.body()
-        print("Raw body received:", raw_body)
+        print("Raw body received:", raw_body[:1000])
 
         payload_dict = json.loads(raw_body)
         print("Decoded JSON:", payload_dict)
