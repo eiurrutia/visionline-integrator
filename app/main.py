@@ -1,12 +1,15 @@
 from fastapi import FastAPI
-from app.routes.gps_routes import webhook_router, gps_router
+from app.routes.gps_routes import gps_webhook_router, gps_router
+from app.routes.alarm_routes import alarm_webhook_router
 from app.utils.database import setup_indexes
 
 app = FastAPI(title="Visionline API Integration")
 
 # Register the routers
-app.include_router(webhook_router)
+app.include_router(gps_webhook_router)
 app.include_router(gps_router)
+
+app.include_router(alarm_webhook_router)
 
 
 @app.on_event("startup")
