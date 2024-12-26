@@ -33,3 +33,17 @@ class GPSPayload(BaseModel):
     type: str
     time: str
     data: List[GPSData]
+
+
+class GPSRecord(BaseModel):
+    _id: str
+    docTime: str
+    receivedAt: str
+    vehicleNumber: str
+    lat: float
+    lng: float
+    speed: float
+    positionTime: str
+
+    class Config:
+        from_attributes = True
