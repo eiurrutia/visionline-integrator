@@ -8,11 +8,13 @@ from typing import List, Optional
 
 TENANT_ID = os.getenv("TENANT_ID")
 
-webhook_router = APIRouter(prefix="/webhook/gps", tags=["Webhook GPS Data"])
+gps_webhook_router = APIRouter(
+    prefix="/webhook/gps", tags=["Webhook GPS Data"]
+)
 
 
-@webhook_router.post("", include_in_schema=False)
-@webhook_router.post("/")
+@gps_webhook_router.post("", include_in_schema=False)
+@gps_webhook_router.post("/")
 async def receive_gps_data(request: Request):
     """
     Endpoint to receive GPS data from Visionaline devices.
