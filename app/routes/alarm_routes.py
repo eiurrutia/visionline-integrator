@@ -1,4 +1,7 @@
 from fastapi import APIRouter, HTTPException, Request
+from pydantic import ValidationError
+from app.models.alarm_data import AlarmPayload
+from app.services.alarm_service import process_alarm_data
 import os
 import json
 
@@ -24,9 +27,17 @@ async def receive_alarm_data(request: Request):
             status_code=400,
             detail=f"Invalid JSON: {e}"
         )
+    try:
+        payload = AlarmPayload(**payload_dict)
+    except ValidationError as ve:
+        print("Validation error:", ve)
+        raise HTTPException(
+            status_code=422,
+            detail=str(ve)
+        )
 
-    print("[ALARM-WEBHOOK] Raw payload received:\n",
-          json.dumps(payload_dict, indent=4))
+    print(f"[ALARM-WEBHOOK] Received ALARM data. Batch time: {payload.time}. "
+          f"Data count: {len(payload.data)}")
 
     # Check type and tenant ID
     if payload_dict["type"] != "ALARM":
@@ -38,7 +49,9 @@ async def receive_alarm_data(request: Request):
     if str(payload_dict["tenantId"]) != TENANT_ID:
         raise HTTPException(status_code=403, detail="Invalid tenant ID")
 
-    return {
-        "status": "received",
-        "message": "Payload received and printed successfully"
-    }
+    result = await process_alarm_data(payload)
+    if result["status"] == "error":
+        print(f"Error processing ALARM data: {result['message']}")
+        raise HTTPException(status_code=400, detail=result["message"])
+
+    return {"status": "received", "data": payload.dict()}
