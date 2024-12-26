@@ -34,7 +34,7 @@ async def process_gps_data(payload: GPSPayload):
 
 
 async def get_gps_data_by_vehicle(
-        vehicleNumber: str, 
+        vehicleNumber: str,
         start_time: Optional[str] = None,
         limit: int = 100, skip: int = 0) -> List[dict]:
     """
