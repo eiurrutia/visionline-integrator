@@ -1,9 +1,9 @@
 from fastapi import APIRouter, HTTPException, Request, Query
+from pydantic import ValidationError
 from app.models.gps_data import GPSPayload, GPSRecord
 from app.services.gps_service import process_gps_data, get_gps_data_by_vehicle
 import os
 import json
-from pydantic import ValidationError
 from typing import List, Optional
 
 TENANT_ID = os.getenv("TENANT_ID")
