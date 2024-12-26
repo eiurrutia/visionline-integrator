@@ -1,17 +1,18 @@
-from fastapi import APIRouter, HTTPException, Request
-from app.models.gps_data import GPSPayload
-from app.services.gps_service import process_gps_data
+from fastapi import APIRouter, HTTPException, Request, Query
+from app.models.gps_data import GPSPayload, GPSRecord
+from app.services.gps_service import process_gps_data, get_gps_data_by_vehicle
 import os
 import json
 from pydantic import ValidationError
+from typing import List, Optional
 
 TENANT_ID = os.getenv("TENANT_ID")
 
-router = APIRouter(prefix="/webhook/gps", tags=["Webhook GPS Data"])
+webhook_router = APIRouter(prefix="/webhook/gps", tags=["Webhook GPS Data"])
 
 
-@router.post("", include_in_schema=False)
-@router.post("/")
+@webhook_router.post("", include_in_schema=False)
+@webhook_router.post("/")
 async def receive_gps_data(request: Request):
     """
     Endpoint to receive GPS data from Visionaline devices.
@@ -33,8 +34,8 @@ async def receive_gps_data(request: Request):
             detail=str(ve)
         )
 
-    print("Received GPS data. Batch time:", payload.time)
-    print("Data count:", len(payload.data))
+    print(f"[GPS-WEBHOOK] Received GPS data. Batch time: {payload.time}. "
+          f"Data count: {len(payload.data)}")
 
     # Check type and tenant ID
     if payload.type != "GPS":
@@ -52,3 +53,37 @@ async def receive_gps_data(request: Request):
         raise HTTPException(status_code=400, detail=result["message"])
 
     return {"status": "received", "data": payload.dict()}
+
+
+gps_router = APIRouter(prefix="/gps", tags=["GPS Data Retrieval"])
+
+
+@gps_router.get("/{vehicleNumber}",
+                response_model=List[GPSRecord],
+                summary="Obtener datos GPS por número de vehículo")
+async def get_gps_records(
+    vehicleNumber: str,
+    start_time: Optional[str] = Query(
+        None,
+        description="Filtro opcional: Tiempo mínimo "
+        "en ISO 8601 (e.g., '2024-12-24T21:00:00Z')"),
+    limit: int = Query(
+        100, ge=1, le=1000,
+        description="Número máximo de registros a retornar"),
+    skip: int = Query(
+        0, ge=0,
+        description="Número de registros a omitir")
+):
+    """
+    Endpoint to retrieve GPS data by vehicle number.
+    """
+    print(f"[GPS] Requesting GPS data for vehicle {vehicleNumber}")
+    try:
+        results = await get_gps_data_by_vehicle(
+            vehicleNumber, start_time, limit, skip
+        )
+        return results
+    except ValueError as ve:
+        raise HTTPException(status_code=400, detail=str(ve))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
