@@ -3,6 +3,7 @@ services:
   api:
     build:
       context: .
+      dockerfile: Dockerfile
     container_name: visionline-integrator
     ports:
       - "8000:8000"
