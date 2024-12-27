@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import List, Optional
+from typing import List, Optional, Union
 
 
 class AlarmData(BaseModel):
@@ -28,3 +28,16 @@ class AlarmPayload(BaseModel):
     type: str
     time: str
     data: List[AlarmData]
+
+
+class AlarmRecord(BaseModel):
+    _id: str
+    alarmCode: Union[str, int]
+    time: str
+    vehicleNumber: Optional[str] = None
+    action: Optional[str] = None
+    speed: Optional[str] = None
+    alarmDescription: Optional[str] = None
+
+    class Config:
+        from_attributes = True

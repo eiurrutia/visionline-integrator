@@ -1,9 +1,10 @@
-from fastapi import APIRouter, HTTPException, Request
+from fastapi import APIRouter, HTTPException, Request, Query
 from pydantic import ValidationError
-from app.models.alarm_data import AlarmPayload
-from app.services.alarm_service import process_alarm_data
+from app.models.alarm_data import AlarmPayload, AlarmRecord
+from app.services.alarm_service import process_alarm_data, get_alarms_data
 import os
 import json
+from typing import List, Optional
 
 TENANT_ID = os.getenv("TENANT_ID")
 
@@ -55,3 +56,35 @@ async def receive_alarm_data(request: Request):
         raise HTTPException(status_code=400, detail=result["message"])
 
     return {"status": "received", "data": payload.dict()}
+
+
+alarms_router = APIRouter(prefix="/alarms", tags=["Alarms Data Retrieval"])
+
+
+@alarms_router.get("/",
+                   response_model=List[AlarmRecord],
+                   summary="Obtener datos de Alarms. "
+                           "Opcional: por número de vehículo")
+async def get_gps_records(
+    vehicleNumber: Optional[str] = Query(
+        None,
+        description="Filtro opcional: Número de Vehículo: "
+        " (e.g., 'RTBB71')"),
+    start_time: Optional[str] = Query(
+        None,
+        description="Filtro opcional: Tiempo mínimo "
+        "en ISO 8601 (e.g., '2024-12-24T21:00:00Z')")
+):
+    """
+    Endpoint to retrieve Alarms data. Optionally by vehicle number.
+    """
+    print(f"[Alarms] Requesting Alarms. Vehicle: {vehicleNumber}, ")
+    try:
+        results = await get_alarms_data(
+            vehicleNumber, start_time
+        )
+        return results
+    except ValueError as ve:
+        raise HTTPException(status_code=400, detail=str(ve))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
