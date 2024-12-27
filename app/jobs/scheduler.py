@@ -32,7 +32,9 @@ async def process_and_send_migtra():
             "fix": record.get("numOfSatellites", 0),
             "ign": record["acc"],
             "vehicleNumber": record["vehicleNumber"],
-            "fleetName": record["fleetName"]
+            "fleetName": record["fleetName"],
+            "receivedAt": record["receivedAt"],
+            "time": record["time"]
         })
 
     if gps_data:
@@ -70,7 +72,9 @@ async def process_and_send_gauss_control():
             "fix": record.get("numOfSatellites", 0),
             "ign": record["acc"],
             "vehicleNumber": record["vehicleNumber"],
-            "fleetName": record["fleetName"]
+            "fleetName": record["fleetName"],
+            "receivedAt": record["receivedAt"],
+            "time": record["time"]
         })
 
     if gps_data:
