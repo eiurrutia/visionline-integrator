@@ -30,7 +30,9 @@ async def process_and_send_migtra():
             "angle": record["angle"],
             "dop": record.get("hdop", 0),
             "fix": record.get("numOfSatellites", 0),
-            "ign": record["acc"]
+            "ign": record["acc"],
+            "vehicleNumber": record["vehicleNumber"],
+            "fleetName": record["fleetName"]
         })
 
     if gps_data:
@@ -66,7 +68,9 @@ async def process_and_send_gauss_control():
             "angle": record["angle"],
             "dop": record.get("hdop", 0),
             "fix": record.get("numOfSatellites", 0),
-            "ign": record["acc"]
+            "ign": record["acc"],
+            "vehicleNumber": record["vehicleNumber"],
+            "fleetName": record["fleetName"]
         })
 
     if gps_data:
