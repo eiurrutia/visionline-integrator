@@ -1,5 +1,6 @@
 from pydantic import BaseModel
-from typing import List, Optional
+from typing import List, Optional, Any
+from datetime import datetime
 
 
 class GPSData(BaseModel):
@@ -49,3 +50,12 @@ class GPSRecord(BaseModel):
 
     class Config:
         from_attributes = True
+
+
+class GPSIntegrationRecord(BaseModel):
+    payloadId: str
+    sentAt: datetime
+    payload: dict
+    response: Any
+    status: str
+    errorMessage: Optional[str] = None
