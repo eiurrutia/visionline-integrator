@@ -18,6 +18,10 @@ alarms_collection = db["alarm_data"]
 # Setup indexes
 async def setup_indexes():
     await gps_payload_collection.create_index("time")
+    await gps_payload_collection.create_index(
+        "receivedAt",
+        expireAfterSeconds=2 * 24 * 3600  # 2 days
+    )
     await gps_collection.create_index("vehicleId")
     await gps_collection.create_index("time")
     await alarms_payload_collection.create_index("time")

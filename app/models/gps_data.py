@@ -26,6 +26,8 @@ class GPSData(BaseModel):
     mileage: Optional[float] = None
 
     extendData: Optional[str] = None
+    sentToMigtra: Optional[bool] = False
+    sentToGaussControl: Optional[bool] = False
 
 
 class GPSPayload(BaseModel):
