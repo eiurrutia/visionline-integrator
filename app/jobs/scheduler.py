@@ -10,37 +10,16 @@ logger = logging.getLogger("apscheduler")
 
 async def process_and_send_migtra():
     """Process and send data to Migtra."""
-    gps_records = await gps_collection.find({
+    gps_data = await gps_collection.find({
         "sentToMigtra": False
     }).to_list(None)
     logger.info("[MIGTRA] Task scheduled to send GPS data to Migtra. "
-                f"Total payloads: {len(gps_records)}")
-
-    gps_data = []
-    for record in gps_records:
-        gps_data.append({
-            "id": record["id"],
-            "asset": record["uniqueId"],
-            "dtgps": record["time"],
-            "dtrx": record["receivedAt"],
-            "lat": record["lat"],
-            "lon": record["lng"],
-            "alt": record.get("altitude", 0),
-            "spd": record["speed"],
-            "angle": record["angle"],
-            "dop": record.get("hdop", 0),
-            "fix": record.get("numOfSatellites", 0),
-            "ign": record["acc"],
-            "vehicleNumber": record["vehicleNumber"],
-            "fleetName": record["fleetName"],
-            "receivedAt": record["receivedAt"],
-            "time": record["time"]
-        })
+                f"Total payloads: {len(gps_data)}")
 
     if gps_data:
         success = await send_gps_data_to_migtra(gps_data)
         if success:
-            gps_ids = [record["_id"] for record in gps_records]
+            gps_ids = [record["_id"] for record in gps_data]
             await gps_collection.update_many(
                 {"_id": {"$in": gps_ids}},
                 {"$set": {"sentToMigtra": True}}
