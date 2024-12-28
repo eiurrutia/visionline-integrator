@@ -19,7 +19,7 @@ async def send_gps_data_to_migtra(gps_data: List[dict]) -> bool:
     payload_id = str(uuid.uuid4())
     try:
         transformed_data = \
-            transform_gps_data_for_migtra(payload_id, gps_data)
+            transform_gps_data_for_migtra(gps_data)
 
         if MIGTRA_INTEGRATION_ACTIVATE:
             async with httpx.AsyncClient() as client:
@@ -35,13 +35,13 @@ async def send_gps_data_to_migtra(gps_data: List[dict]) -> bool:
             response_data = response.json()
             if response.status_code == 200:
                 await log_migtra_integration(
-                    payload_id, gps_data, response_data, "success"
+                    payload_id, transformed_data, response_data, "success"
                 )
                 logger.info("[MIGTRA API] Data sent successfully "
                             f"for payload ID: {payload_id}")
             else:
                 await log_migtra_integration(
-                    payload_id, gps_data, response_data, "failed"
+                    payload_id, transformed_data, response_data, "failed"
                 )
                 logger.error("[MIGTRA API] Failed to send data. "
                              f"Payload ID: {payload_id}, "
@@ -51,13 +51,13 @@ async def send_gps_data_to_migtra(gps_data: List[dict]) -> bool:
             logger.info("[MIGTRA API] Integration is not activated. "
                         "Data not sent.")
             await log_migtra_integration(
-                payload_id, gps_data, None, "not_activated"
+                payload_id, transformed_data, None, "not_activated"
             )
             return True
 
     except Exception as e:
         await log_migtra_integration(
-            payload_id, gps_data, None, "failed", str(e)
+            payload_id, transformed_data, None, "failed", str(e)
         )
         logger.error(f"[MIGTRA API] Exception while sending data: {e}")
         return False
@@ -65,7 +65,6 @@ async def send_gps_data_to_migtra(gps_data: List[dict]) -> bool:
 
 
 def transform_gps_data_for_migtra(
-        payload_id: str,
         gps_data: List[dict]) -> List[dict]:
     """
     Transform GPS data for Migtra API.
@@ -73,7 +72,7 @@ def transform_gps_data_for_migtra(
     transformed = []
     for data in gps_data:
         transformed.append({
-            "id": payload_id,
+            "id": data["id"],
             "asset": data["vehicleNumber"],
             "dtgps": data["time"],
             "dtrx": data["receivedAt"].isoformat()

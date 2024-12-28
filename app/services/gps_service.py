@@ -18,7 +18,9 @@ async def process_gps_data(payload: GPSPayload):
                 {
                     **gps_data.dict(),
                     "payloadId": payload_id,
-                    "receivedAt": received_at
+                    "receivedAt": received_at,
+                    "sentToMigtra": False,
+                    "sentToGaussControl": False
                 }
                 for gps_data in payload.data
             ]
