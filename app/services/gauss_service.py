@@ -3,26 +3,51 @@ from app.utils.database import gps_gauss_integration_collection
 from datetime import datetime, timezone
 import uuid
 import logging
+from typing import List
 
 logger = logging.getLogger("apscheduler")
 
 
 async def send_gps_data_to_gauss_control(gps_data: list) -> bool:
     payload_id = str(uuid.uuid4())
-    logger.info(gps_data)
     try:
+        transformed_data = \
+            transform_gps_data_for_gauss(gps_data)
         # response = await simulate_migtra_api_call(payload)
         response = {"status": "success",
                     "message": "GPS data sent successfully"}
 
         await log_gauss_integration(
-            payload_id, gps_data, response, "success"
+            payload_id, transformed_data, response, "success"
         )
     except Exception as e:
         await log_gauss_integration(
-            payload_id, gps_data, None, "failed", str(e)
+            payload_id, transformed_data, None, "failed", str(e)
         )
     return True
+
+
+def transform_gps_data_for_gauss(
+        gps_data: List[dict]) -> List[dict]:
+    """
+    Transform GPS data for Migtra API.
+    """
+    transformed = []
+    for data in gps_data:
+        transformed.append({
+            "vehicleCode": data["vehicleNumber"],
+            "driverCode": None,
+            "start":
+                datetime
+                .strptime(data["time"], "%Y-%m-%dT%H:%M:%SZ")
+                .strftime("%Y-%m-%d %H:%M:%S"),
+            "latitude": data["lat"],
+            "longitude": data["lng"],
+            "altitude": data.get("altitude", 0),
+            "speed": data["speed"],
+            "tags": "",
+        })
+    return transformed
 
 
 async def log_gauss_integration(

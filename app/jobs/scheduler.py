@@ -29,37 +29,15 @@ async def process_and_send_migtra():
 
 async def process_and_send_gauss_control():
     """Process and send data to Gauss Control."""
-    gps_records = await gps_collection.find({
+    gps_data = await gps_collection.find({
         "sentToGaussControl": False
     }).to_list(None)
     logger.info("[GAUSS] Task scheduled to send GPS data to Migtra. "
-                f"Total payloads: {len(gps_records)}")
-
-    gps_data = []
-    for record in gps_records:
-        gps_data.append({
-            "id": record["id"],
-            "asset": record["uniqueId"],
-            "dtgps": record["time"],
-            "dtrx": record["receivedAt"],
-            "lat": record["lat"],
-            "lon": record["lng"],
-            "alt": record.get("altitude", 0),
-            "spd": record["speed"],
-            "angle": record["angle"],
-            "dop": record.get("hdop", 0),
-            "fix": record.get("numOfSatellites", 0),
-            "ign": record["acc"],
-            "vehicleNumber": record["vehicleNumber"],
-            "fleetName": record["fleetName"],
-            "receivedAt": record["receivedAt"],
-            "time": record["time"]
-        })
-
+                f"Total payloads: {len(gps_data)}")
     if gps_data:
         success = await send_gps_data_to_gauss_control(gps_data)
         if success:
-            gps_ids = [record["_id"] for record in gps_records]
+            gps_ids = [record["_id"] for record in gps_data]
             await gps_collection.update_many(
                 {"_id": {"$in": gps_ids}},
                 {"$set": {"sentToGaussControl": True}}
