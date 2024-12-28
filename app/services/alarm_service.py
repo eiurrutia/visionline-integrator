@@ -2,7 +2,7 @@ from app.utils.database import alarms_collection, alarms_payload_collection
 from app.utils.alarm_types import ALARM_TYPE_DESCRIPTIONS
 from app.models.alarm_data import AlarmPayload
 import os
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import List, Optional
 
 LOG_ALARM_PAYLOAD = os.getenv("LOG_ALARM_PAYLOAD", "false").lower() == 'true'
@@ -22,7 +22,7 @@ async def process_alarm_data(payload: AlarmPayload):
                 "tenantId": payload.tenantId,
                 "type": payload.type,
                 "time": payload.time,
-                "receivedAt": datetime.utcnow().isoformat(),
+                "receivedAt": datetime.now(timezone.utc),
                 "dataCount": len(payload.data),
                 "data": [alarm_data.dict() for alarm_data in payload.data]
             }
