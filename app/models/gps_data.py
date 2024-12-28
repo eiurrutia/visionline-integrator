@@ -41,7 +41,7 @@ class GPSPayload(BaseModel):
 class GPSRecord(BaseModel):
     _id: str
     docTime: str
-    receivedAt: str
+    receivedAt: datetime
     vehicleNumber: str
     lat: float
     lng: float
