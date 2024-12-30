@@ -1,5 +1,8 @@
 import httpx
-from app.utils.database import gps_gauss_integration_collection
+from app.utils.database import (
+    gps_gauss_integration_collection,
+    alarms_gauss_integration_collection
+)
 from datetime import datetime, timezone
 import uuid
 import logging
@@ -78,8 +81,9 @@ async def send_gps_data_to_gauss_control(gps_data: list) -> bool:
     try:
         transformed_data = transform_gps_data_for_gauss(gps_data)
         if not GAUSS_INTEGRATION_ACTIVATE:
-            logger.info("[GAUSS API] Integration is deactivated.")
+            logger.info("[GAUSS GPS API] Integration is deactivated.")
             await log_gauss_integration(
+                gps_gauss_integration_collection,
                 payload_id, transformed_data, None, "not_activated"
             )
             return True
@@ -89,7 +93,7 @@ async def send_gps_data_to_gauss_control(gps_data: list) -> bool:
             await fetch_gauss_token()
 
         async with httpx.AsyncClient() as client:
-            logger.info("[GAUSS API] Sending GPS data.")
+            logger.info("[GAUSS GPS API] Sending GPS data.")
             response = await client.post(
                 GAUSS_POSITION_UPDATE_URL,
                 json=transformed_data,
@@ -103,28 +107,73 @@ async def send_gps_data_to_gauss_control(gps_data: list) -> bool:
 
             response_data = response.json()
             await log_gauss_integration(
+                gps_gauss_integration_collection,
                 payload_id, transformed_data, response_data, "success"
             )
-            logger.info("[GAUSS API] Data sent successfully for payload ID: "
-                        f"{payload_id}")
+            logger.info("[GAUSS GPS API] Data sent successfully "
+                        f"for payload ID: {payload_id}")
+    except httpx.HTTPStatusError as e:
+        if e.response.status_code == 401:  # Token expired
+            logger.warning("[GAUSS GPS API] Token expired. "
+                           "Fetching a new one.")
+            await fetch_gauss_token()
+            return await send_gps_data_to_gauss_control(gps_data)
+        await log_gauss_integration(
+            gps_gauss_integration_collection,
+            payload_id, gps_data, None, "failed", str(e)
+        )
+        logger.error(f"[GAUSS GPS API] HTTP error: {e}")
+    except Exception as e:
+        await log_gauss_integration(
+            gps_gauss_integration_collection,
+            payload_id, gps_data, None, "failed", str(e)
+        )
+        logger.error(f"[GAUSS GPS API] Exception while sending data: {e}")
+    return True
+
+
+async def send_alarms_to_gauss(alarms: List[dict]):
+    """
+    Send alarms to Gauss Control API.
+    """
+    payload_id = str(uuid.uuid4())
+    try:
+        if not GAUSS_INTEGRATION_ACTIVATE:
+            logger.info("[GAUSS ALARMS API] Integration is deactivated.")
+            await log_gauss_integration(
+                alarms_gauss_integration_collection,
+                payload_id, alarms, None, "not_activated"
+            )
+            return True
+        if not gauss_token:
+            await fetch_gauss_token()
+
+        async with httpx.AsyncClient() as client:
+            response = await client.post(
+                GAUSS_POSITION_UPDATE_URL,
+                json=alarms,
+                headers={
+                    "Content-Type": "application/json",
+                    "Authorization": f"Bearer {gauss_token}"
+                },
+                timeout=30
+            )
+            response.raise_for_status()
+            logger.info("[GAUSS API] Alarms sent successfully: "
+                        f"{response.json()}")
+
     except httpx.HTTPStatusError as e:
         if e.response.status_code == 401:  # Token expired
             logger.warning("[GAUSS API] Token expired. Fetching a new one.")
             await fetch_gauss_token()
-            return await send_gps_data_to_gauss_control(gps_data)
-        await log_gauss_integration(
-            payload_id, gps_data, None, "failed", str(e)
-        )
+            return await send_alarms_to_gauss(alarms)
         logger.error(f"[GAUSS API] HTTP error: {e}")
     except Exception as e:
-        await log_gauss_integration(
-            payload_id, gps_data, None, "failed", str(e)
-        )
-        logger.error(f"[GAUSS API] Exception while sending data: {e}")
-    return True
+        logger.error(f"[GAUSS API] Exception while sending alarms: {e}")
 
 
 async def log_gauss_integration(
+        collection,
         payload_id: str, payload: dict,
         response: dict, status: str,
         error_message: str = None):
@@ -140,9 +189,9 @@ async def log_gauss_integration(
             "status": status,
             "errorMessage": error_message,
         }
-        await gps_gauss_integration_collection.insert_one(record)
+        await collection.insert_one(record)
         logger.info("[GAUSS INTEGRATION] Log saved for payload ID: "
-                    f"{payload_id}")
+                    f"{payload_id} in collection: {collection.name}")
     except Exception as e:
         logger.info("[GAUSS INTEGRATION] Error saving log for payload ID: "
-                    f"{payload_id} - {e}")
+                    f"{payload_id} - {e} in collection: {collection.name}")

@@ -55,3 +55,65 @@ ALARM_TYPE_DESCRIPTIONS = {
     210000: "Abnormal Driving Alarm",
     210001: "Unknown Driver Alarm",
 }
+
+
+ALARMS_GAUSS_MAPPING = {
+    # Distracciones
+
+    56002: ("Distraction", "PhoneUse"),  # Uso del celular
+    56004: ("Distraction", "DistractedDriving"),  # Conducir distraído
+    56003: ("Distraction", "Smoking"),  # Fumar
+    0: ("Distraction", "VideoLossAlarm"),  # Pérdida de video
+    1: ("Distraction", "VideoBlockAlarm"),  # Bloqueo de video
+
+    # Somnolencia
+    56000: ("Drowsiness", "Microsleep"),  # Microsueño/Somnolencia
+    56010: ("Drowsiness", "LightDrowsiness"),  # Bostezos/Light Drowsiness
+    # Otros microsueños no especificados
+    6005: ("SensorFieldOfViewObstruction", "CoveredSensors"),
+    # Obstrucción de sensores
+
+    # Fallas de sensores
+    105: ("SensorFieldOfViewObstruction", "DeviceDeviation"),
+    # Desviación de dispositivo
+
+    # Estado del equipo
+    9: ("VehicleStatus", "LowVoltage"),  # Bajo voltaje
+    7: ("Driving", "EmergencyAlarm"),  # Alarma de emergencia
+
+    # Conducción
+    8: ("MaxSpeed", "Speeding"),  # Exceso de velocidad
+    17005: ("Driving", "OutOfLane"),  # Salida de pista
+    18006: ("Driving", "AbruptAcceleration"),  # Aceleración brusca
+    18007: ("Driving", "HardBraking"),  # Frenado brusco
+    18010: ("Driving", "SharpLeftTurn"),  # Giro brusco a la izquierda
+    18011: ("Driving", "SharpRightTurn"),  # Giro brusco a la derecha
+    56016: ("Driving", "UnfastenedSeatBelt"),
+    # Cinturón de seguridad desabrochado
+
+    # Exceso de velocidad en geozonas
+    17007: ("MaxGeoSpeed", "MoreSevereGeoSpeeding"),
+    # Exceso severo en geozona
+    17008: ("MaxGeoSpeed", "SevereGeoSpeeding"),  # Exceso en geozona
+    17009: ("MaxGeoSpeed", "NightGeoSpeeding"),  # Exceso nocturno en geozona
+    170010: ("MaxGeoSpeed", "MorningGeoSpeeding"),  # Exceso diurno en geozona
+
+    # Incumplimientos de protocolo
+    210000: ("UnfulfilledProtocol", "FormNotEntered"),
+    # Formulario no ingresado
+    210001: ("UnfulfilledProtocol", "FormWithWrongData"),
+    # Formulario con datos erróneos
+
+    # Alarmas generales
+    56006: ("Driving", "FrontCollision"),  # Colisión frontal
+    56009: ("Driving", "Tailgating"),  # Seguimiento muy cercano
+    56018: ("Driving", "BlindSpotDetectionRight"),
+    # Detección de punto ciego (derecha)
+    56023: ("Driving", "BlindSpotDetectionLeft"),
+    # Detección de punto ciego (izquierda)
+    56046: ("Driving", "BlindSpotDetectionRear"),
+    # Detección de punto ciego (trasera)
+    17000: ("MaxSpeed", "FenceAlarm"),  # Alarma de cerca
+    17003: ("MaxSpeed", "EnteringLineAlarm"),  # Alarma al entrar en línea
+    17004: ("MaxSpeed", "OutOfLineAlarm"),  # Alarma al salir de línea
+}
