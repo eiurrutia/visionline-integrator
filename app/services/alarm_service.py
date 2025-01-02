@@ -36,7 +36,7 @@ async def process_alarm_data(payload: AlarmPayload):
             await handle_alarm_for_gauss(alarm_data)
         return {
             "status": "success",
-            "message": "ALARM data stored successfully"
+            "message": "ALARM data processed successfully"
         }
     except Exception as e:
         return {"status": "error", "message": str(e)}
