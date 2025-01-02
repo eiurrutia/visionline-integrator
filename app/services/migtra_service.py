@@ -75,7 +75,7 @@ def transform_gps_data_for_migtra(
     for data in gps_data:
         transformed.append({
             "id": data["id"],
-            "asset": data["vehicleNumber"],
+            "asset": data["vehicleNumber"].split()[0],
             "dtgps": data["time"],
             "dtrx": data["receivedAt"].isoformat()
             if isinstance(data["receivedAt"], datetime)
