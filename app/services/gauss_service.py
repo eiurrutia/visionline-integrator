@@ -118,7 +118,7 @@ async def send_gps_data_to_gauss_control(gps_data: list) -> bool:
                     gps_gauss_integration_collection,
                     payload_id, transformed_data, response_data, "success"
                 )
-                logger.info("[GAUSS GPS API] Data sent successfully: "
+                logger.info("[GAUSS GPS API] Data sent successfully "
                             f"for payload: {payload_id}")
 
     except httpx.HTTPStatusError as e:
