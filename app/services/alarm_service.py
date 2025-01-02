@@ -102,15 +102,15 @@ async def handle_alarm_for_gauss(alarm_data: dict):
     Handle alarm data for Gauss. If the alarm is not complete (START and END),
     it will be saved in a cache until the other part is received.
     """
-    print('[DEBUG] Inside handle_alarm_for_gauss')
     alarm_id = alarm_data.alarmId
     action = alarm_data.action
 
     alert_name, alert_type = ALARMS_GAUSS_MAPPING.get(
         alarm_data.alarmType, ("Unknown", "Unknown")
     )
-
-    print(f"[DEBUG] Processing alarm {alert_name} with action {alert_type}")
+    if alert_name == "Unknown":
+        print(f"[WEBHOOK-ALARMS] Unknown alarm type: {alarm_data.alarmType}")
+        return False
 
     if action == "START":
         if alarm_id in alarm_cache and "end" in alarm_cache[alarm_id]:
