@@ -34,7 +34,7 @@ async def process_and_send_gauss_control():
     Sends only the last GPS position per vehicle in the last minute.
     """
     # Define the time range for filtering
-    one_minute_ago = datetime.now(timezone.utc) - timedelta(minutes=1)
+    one_minute_ago = datetime.now(timezone.utc) - timedelta(minutes=3)
 
     # Fetch GPS data within the last minute
     gps_data = await gps_collection.find({
@@ -69,7 +69,7 @@ async def process_and_send_gauss_control():
     # Send the filtered data to Gauss
     success = await send_gps_data_to_gauss_control(filtered_data)
     if success:
-        gps_ids = [record["_id"] for record in filtered_data]
+        gps_ids = [record["_id"] for record in gps_data]
         await gps_collection.update_many(
             {"_id": {"$in": gps_ids}},
             {"$set": {"sentToGaussControl": True}}
