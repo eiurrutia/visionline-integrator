@@ -118,27 +118,31 @@ async def handle_alarm_for_gauss(alarm_data: dict):
                   f"START for alarm {alarm_id}. Sending to Gauss.")
             cached_alarm = alarm_cache.pop(alarm_id)
             cached_alarm.update({
-                "start": alarm_data.startTime,
+                "start": datetime
+                        .strptime(alarm_data.startTime, "%Y-%m-%dT%H:%M:%SZ")
+                        .strftime("%Y-%m-%d %H:%M:%S"),
                 "latitude": float(alarm_data.gpsLat),
                 "longitude": float(alarm_data.gpsLng),
                 "altitude": float(alarm_data.gpsAltitude or 0),
-                "vehicleCode": alarm_data.vehicleNumber,
+                "vehicleCode": alarm_data.vehicleNumber.split()[0],
                 "alertName": alert_name,
                 "type": alert_type,
                 "driverCode": alarm_data.driverName,
                 "serializedMetaData": {
                     "speed": float(alarm_data.gpsSpeed or 0)
-                },
+                    },
             })
             await send_alarms_to_gauss([cached_alarm])
         else:
             print(f"[WEBHOOK-ALARMS] Saving START alarm  {alarm_id} in cache.")
             alarm_cache[alarm_id] = {
-                "start": alarm_data.startTime,
+                "start": datetime
+                .strptime(alarm_data.startTime, "%Y-%m-%dT%H:%M:%SZ")
+                .strftime("%Y-%m-%d %H:%M:%S"),
                 "latitude": float(alarm_data.gpsLat),
                 "longitude": float(alarm_data.gpsLng),
                 "altitude": float(alarm_data.gpsAltitude or 0),
-                "vehicleCode": alarm_data.vehicleNumber,
+                "vehicleCode": alarm_data.vehicleNumber.split()[0],
                 "alertName": alert_name,
                 "type": alert_type,
                 "driverCode": alarm_data.driverName,
@@ -152,17 +156,22 @@ async def handle_alarm_for_gauss(alarm_data: dict):
             print("[WEBHOOK-ALARMS] Found START before "
                   f"END for alarm {alarm_id}. Sending to Gauss.")
             cached_alarm = alarm_cache.pop(alarm_id)
-            cached_alarm["end"] = alarm_data.endTime
+            cached_alarm["end"] = \
+                datetime.strptime(
+                    alarm_data.endTime, "%Y-%m-%dT%H:%M:%SZ"
+                    ).strftime("%Y-%m-%d %H:%M:%S")
             await send_alarms_to_gauss([cached_alarm])
         else:
             print(f"[WEBHOOK-ALARMS] Saving END alarm {alarm_id} in cache "
                   "for later processing with START.")
             alarm_cache[alarm_id] = {
-                "end": alarm_data.endTime,
+                "end": datetime
+                .strptime(alarm_data.endTime, "%Y-%m-%dT%H:%M:%SZ")
+                .strftime("%Y-%m-%d %H:%M:%S"),
                 "latitude": float(alarm_data.gpsLat),
                 "longitude": float(alarm_data.gpsLng),
                 "altitude": float(alarm_data.gpsAltitude or 0),
-                "vehicleCode": alarm_data.vehicleNumber,
+                "vehicleCode": alarm_data.vehicleNumber.split()[0],
                 "alertName": alert_name,
                 "type": alert_type,
                 "driverCode": alarm_data.driverName,
