@@ -41,7 +41,6 @@ def transform_gps_data_for_gauss(gps_data: List[dict]) -> List[dict]:
             .strptime(data["time"], "%Y-%m-%dT%H:%M:%SZ")
             .strftime("%Y-%m-%d %H:%M:%S"),
             "speed": data["speed"],
-            "tags": ""
         })
     return transformed
 
