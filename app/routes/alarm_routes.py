@@ -32,21 +32,26 @@ async def receive_alarm_data(request: Request):
         payload = AlarmPayload(**payload_dict)
     except ValidationError as ve:
         print("Validation error:", ve)
-        raise HTTPException(
-            status_code=422,
-            detail=str(ve)
-        )
+        print("Payload dict:", payload_dict)
+        return {
+            "status": "received",
+            "data": payload.dict(),
+            'error': str(ve)
+        }
 
     print(f"[ALARM-WEBHOOK] Received ALARM data. Batch time: {payload.time}. "
           f"Data count: {len(payload.data)}")
 
     # Check type and tenant ID
     if payload_dict["type"] != "ALARM":
-        raise HTTPException(
-            status_code=400,
-            detail="Invalid payload type. Expected 'ALARM' "
-                   f"and received: {payload_dict['type']}."
-        )
+        print("Invalid payload type. Expected 'ALARM' "
+              f"and received: {payload_dict['type']}.")
+        return {
+            "status": "received",
+            "data": payload.dict(),
+            'error': "Invalid payload type. "
+                     f"Expected ALARM and received {payload_dict['type']}"
+        }
     if str(payload_dict["tenantId"]) != TENANT_ID:
         raise HTTPException(status_code=403, detail="Invalid tenant ID")
 

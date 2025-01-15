@@ -23,6 +23,8 @@ async def receive_gps_data(request: Request):
         raw_body = await request.body()
         payload_dict = json.loads(raw_body)
     except json.JSONDecodeError as e:
+        print(f"Invalid JSON: {e}")
+        print(f"Raw body: {raw_body}")
         raise HTTPException(
             status_code=400,
             detail=f"Invalid JSON: {e}"
@@ -31,21 +33,26 @@ async def receive_gps_data(request: Request):
         payload = GPSPayload(**payload_dict)
     except ValidationError as ve:
         print("Validation error:", ve)
-        raise HTTPException(
-            status_code=422,
-            detail=str(ve)
-        )
+        print("Payload dict:", payload_dict)
+        return {
+            "status": "received",
+            "data": payload.dict(),
+            'error': str(ve)
+        }
 
     print(f"[GPS-WEBHOOK] Received GPS data. Batch time: {payload.time}. "
           f"Data count: {len(payload.data)}")
 
     # Check type and tenant ID
     if payload.type != "GPS":
-        raise HTTPException(
-            status_code=400,
-            detail="Invalid payload type. Expected 'GPS' "
-                   f"and received '{payload.type}'"
-        )
+        print(f"Invalid payload type. Expected 'GPS' "
+              f"and received '{payload.type}'")
+        return {
+            "status": "received",
+            "data": payload.dict(),
+            'error': "Invalid payload type. "
+                     f"Expected GPS and received {payload.type}"
+        }
     if str(payload.tenantId) != TENANT_ID:
         raise HTTPException(status_code=403, detail="Invalid tenant ID")
 
