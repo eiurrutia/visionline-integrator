@@ -112,6 +112,11 @@ async def handle_alarm_for_gauss(alarm_data: dict):
         print(f"[WEBHOOK-ALARMS] Unknown alarm type: {alarm_data.alarmType}")
         return False
 
+    speed_limit = None
+    if alarm_data.alarmType == 8 and alarm_data.alarmAdditionalInfo:
+        speed_limit = \
+            float(alarm_data.alarmAdditionalInfo.get("speedLimit", 0)) / 100
+
     if action == "START":
         if alarm_id in alarm_cache and "end" in alarm_cache[alarm_id]:
             print("[WEBHOOK-ALARMS] Found END before "
@@ -128,10 +133,16 @@ async def handle_alarm_for_gauss(alarm_data: dict):
                 "alertName": alert_name,
                 "type": alert_type,
                 "driverCode": alarm_data.driverName,
-                "serializedMetaData": {
-                    "speed": float(alarm_data.gpsSpeed or 0)
-                    },
+                "serializedMetaData":
+                    {"speedLimit": speed_limit}
+                    if alarm_data.alarmType == 8
+                    else {"speed": float(alarm_data.gpsSpeed or 0)},
             })
+            if alarm_data.alarmType == 8:
+                cached_alarm.update({
+                    "metricUnit": "km/h",
+                    "value": float(alarm_data.gpsSpeed or 0),
+                })
             await send_alarms_to_gauss([cached_alarm])
         else:
             print(f"[WEBHOOK-ALARMS] Saving START alarm  {alarm_id} in cache.")
@@ -146,10 +157,15 @@ async def handle_alarm_for_gauss(alarm_data: dict):
                 "alertName": alert_name,
                 "type": alert_type,
                 "driverCode": alarm_data.driverName,
-                "serializedMetaData": {
-                    "speed": float(alarm_data.gpsSpeed or 0)
-                },
+                "serializedMetaData":
+                    {"speedLimit": speed_limit} if alarm_data.alarmType == 8
+                    else {"speed": float(alarm_data.gpsSpeed or 0)},
             }
+            if alarm_data.alarmType == 8:
+                alarm_cache[alarm_id].update({
+                    "metricUnit": "km/h",
+                    "value": float(alarm_data.gpsSpeed or 0),
+                })
 
     elif action == "END":
         if alarm_id in alarm_cache and "start" in alarm_cache[alarm_id]:
@@ -175,7 +191,12 @@ async def handle_alarm_for_gauss(alarm_data: dict):
                 "alertName": alert_name,
                 "type": alert_type,
                 "driverCode": alarm_data.driverName,
-                "serializedMetaData": {
-                    "speed": float(alarm_data.gpsSpeed or 0)
-                },
+                "serializedMetaData":
+                    {"speedLimit": speed_limit} if alarm_data.alarmType == 8
+                    else {"speed": float(alarm_data.gpsSpeed or 0)},
             }
+            if alarm_data.alarmType == 8:
+                alarm_cache[alarm_id].update({
+                    "metricUnit": "km/h",
+                    "value": float(alarm_data.gpsSpeed or 0),
+                })
