@@ -35,7 +35,7 @@ async def receive_alarm_data(request: Request):
         print("Payload dict:", payload_dict)
         return {
             "status": "received",
-            "data": payload.dict(),
+            "data": payload_dict,
             'error': str(ve)
         }
 
@@ -48,7 +48,7 @@ async def receive_alarm_data(request: Request):
               f"and received: {payload_dict['type']}.")
         return {
             "status": "received",
-            "data": payload.dict(),
+            "data": payload_dict,
             'error': "Invalid payload type. "
                      f"Expected ALARM and received {payload_dict['type']}"
         }

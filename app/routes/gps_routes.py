@@ -36,7 +36,7 @@ async def receive_gps_data(request: Request):
         print("Payload dict:", payload_dict)
         return {
             "status": "received",
-            "data": payload.dict(),
+            "data": payload_dict,
             'error': str(ve)
         }
 
@@ -49,7 +49,7 @@ async def receive_gps_data(request: Request):
               f"and received '{payload.type}'")
         return {
             "status": "received",
-            "data": payload.dict(),
+            "data": payload_dict,
             'error': "Invalid payload type. "
                      f"Expected GPS and received {payload.type}"
         }
