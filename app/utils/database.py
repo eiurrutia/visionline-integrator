@@ -22,11 +22,11 @@ alarms_gauss_integration_collection = db["alarms_gauss_integration"]
 async def setup_indexes():
     await gps_payload_collection.create_index(
         "receivedAt",
-        expireAfterSeconds=7 * 24 * 3600  # 7 days
+        expireAfterSeconds=3 * 24 * 3600  # 3 days
     )
     await gps_collection.create_index(
         "receivedAt",
-        expireAfterSeconds=7 * 24 * 3600  # 7 days
+        expireAfterSeconds=3 * 24 * 3600  # 3 days
     )
     await alarms_payload_collection.create_index(
         "receivedAt",
@@ -34,11 +34,11 @@ async def setup_indexes():
     )
     await gps_migtra_integration_collection.create_index(
         "sentAt",
-        expireAfterSeconds=7 * 24 * 3600  # 7 days
+        expireAfterSeconds=3 * 24 * 3600  # 3 days
     )
     await gps_gauss_integration_collection.create_index(
         "sentAt",
-        expireAfterSeconds=7 * 24 * 3600  # 7 days
+        expireAfterSeconds=3 * 24 * 3600  # 3 days
     )
     await alarms_gauss_integration_collection.create_index(
         "sentAt",
